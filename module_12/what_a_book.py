@@ -1,4 +1,5 @@
 #Importing mysql.connector and errorcode
+from imghdr import what
 import mysql.connector
 from mysql.connector import errorcode
 from pymongo import MongoClient
@@ -49,18 +50,24 @@ class whatabook:#Define whatabook menu as a class for easy recall
             user_id = int(input("\nEnter your User ID (Example '1' for User ID 1)  "))
             if user_id <1 or user_id >3:
                 print("\n Incorrect User ID")
+                whatabook.validate_user()
             return user_id
         except ValueError:
             print("\n Incorrect input format, please try again.")
+            whatabook.validate_user()
 
     def show_account_menu():#Building the User Account Menu
         try:
             print("\n----User Menu----")
             print("\n1. Wishlist\n2. Add Book\n3. Main Menu\n")
             user_choice = int(input("Choose what you would like to do (Example '1' for Wishlist)  "))
+            if user_choice <1 or user_choice >3:
+                print("\n Incorrect menu option. Please try again.")
+                whatabook.show_account_menu()
             return user_choice
         except ValueError:
             print("\n Incorrect input format, please try again.")
+            whatabook.show_account_menu()
 
     def show_wishlist(_cursor, _user_id):#Building Wishlist Query
         _cursor.execute("SELECT user.user_id, user.first_name, user.last_name, book.book_id, book.book_name, book.author FROM wishlist INNER JOIN user ON wishlist.user_id = user.user_id INNER JOIN book ON wishlist.book_id = book.book_id WHERE user.user_id = {}".format(_user_id))
@@ -80,7 +87,7 @@ class whatabook:#Define whatabook menu as a class for easy recall
         for book in adding_books:
             print("\n Book ID: {}\n Book Name: {}\n Author: {}\n Details: {}".format(book[0], book[1], book[2], book[3]))
         
-    def add_book_to_wishlist(_cursor, _user_id, _book_id):#Adding a book still needs t/s............................
+    def add_book_to_wishlist(_cursor, _user_id, _book_id):
         add_book = ("INSERT INTO wishlist(user_id, book_id) VALUES({}, {})".format(_user_id, _book_id))
         _cursor.execute(add_book)
 
@@ -103,13 +110,17 @@ while True:
                 whatabook.show_books_to_add(cursor, user_id)
                 book_id = int(input("\nPlease choose a Book ID to add:  "))
                 whatabook.add_book_to_wishlist(cursor, user_id, book_id)
-#ADD the book menu still needs work..............
+                db.commit()
+                added_book = input("Added book to your wishlist. Press any key to continue...")
+                user_option = whatabook.show_account_menu()
             elif user_option == 3:
                 whatabook.show_menu()
+            elif user_option <1 or user_option >3:
+                print("\n Incorrect option, please try again.\n")
         elif menu_choice == 4:
             print("Thank you....")
             exit()
-        if menu_choice <1 or menu_choice >4:
+        elif menu_choice <1 or menu_choice >4:
                 print("\nIncorrect input, please try again.\n")
     except ValueError:
         print("\nIncorrect input format, please try again.")
