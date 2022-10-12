@@ -1,5 +1,4 @@
 #Importing mysql.connector and errorcode
-from imghdr import what
 import mysql.connector
 from mysql.connector import errorcode
 from pymongo import MongoClient
